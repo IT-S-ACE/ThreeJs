@@ -8,6 +8,9 @@ import Physic from './physics/physic';
 // import GUI from 'lil-gui';
 import * as dat from 'dat.gui';
 import JetSki from './physics/jetski';
+import ModelLoaders from './ModelLoaders';
+import SceneManager from './SceneManager';
+
 
 const gui = new dat.GUI();
 
@@ -92,6 +95,32 @@ function init() {
       side: THREE.DoubleSide
     }
   );
+
+  const modelLoaders = new ModelLoaders();
+  const sceneManager = new SceneManager('Web_GL');
+
+//Load the icebergs
+async function loadIcebergModel() {
+    // Load a glTF resource
+ 
+    const iceberg_model6 = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
+    if (iceberg_model6) {
+      
+        iceberg_model6.scale.set(100, 100, 100);
+        iceberg_model6.position.set(5, 0, 1000);
+        iceberg_model6.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+            }
+        });
+        scene.add(iceberg_model6);
+    }
+}
+loadIcebergModel();
+
+
+
+
 
   water.rotation.x = -Math.PI / 2;
   scene.add(water);

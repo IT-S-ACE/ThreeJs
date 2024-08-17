@@ -1,0 +1,11 @@
+Model Information:
+* title:	Iceber01
+* source:	https://sketchfab.com/3d-models/iceber01-e40fa40cd116460aae8e28f7641d6ed9
+* author:	gandhichejarla (https://sketchfab.com/gandhichejarla)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Iceber01" (https://sketchfab.com/3d-models/iceber01-e40fa40cd116460aae8e28f7641d6ed9) by gandhichejarla (https://sketchfab.com/gandhichejarla) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
