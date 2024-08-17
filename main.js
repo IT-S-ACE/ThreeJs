@@ -84,20 +84,19 @@ playAudio(x) {
     this.turnOnAudio.play();
   }
 else if(x===2){
-  this.speedUpAudio.play(); 
+  this.speedUpAudio.Pla
+  .play(); 
 }
    
 }
 
-stopAudio() {
-    if (this.speedUpAudio && this.turnOnAudio) { // Stop if currently playing
-        this.speedUpAudio.stop();
-        this.turnOnAudio = false;
-    }
-    if (this.turnOnAudio && this.jetSoundPlaying2) { // Stop if currently playing
-        this.turnOnAudio.stop();
-        this.jetSoundPlaying2 = false;
-    }
+stopAudio(x) {
+   if(x===1){
+    this.turnOnAudio.stop();
+  }
+else if(x===2){
+  this.speedUpAudio.stop(); 
+}
   }}
 
 let jet = new JET();
@@ -251,10 +250,17 @@ let turnedOn =false;
   window.addEventListener('keydown', function (e) {
     if (e.key === "ArrowUp") {
       if(!turnedOn){
-        jet.playAudio(1);
+        jet.turnOnAudio.play();
+        // .playAudio(1);
         turnedOn=true;
       }
         throttle = 30;
+
+        if(turnedOn&&!jet.turnOnAudio.isPlaying){
+          jet.speedUpAudio.play();
+
+        }
+
         if (throttleDecrementInterval) {
             clearInterval(throttleDecrementInterval);
             throttleDecrementInterval = null;
@@ -287,6 +293,7 @@ let turnedOn =false;
 
 window.addEventListener('keyup', function (e) {
    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+    jet.stopAudio(2);
         if (!throttleDecrementInterval) {
             throttleDecrementInterval = setInterval(() => {
                 throttle -= 1;
