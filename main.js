@@ -40,7 +40,6 @@ class JET {
      /// gltf.scene.rotation.z = Math.PI/5;
       this.jet = gltf.scene;
       scene.add(gltf.scene);
-      this.setupAudio(); 
       animate();
     });
   }
@@ -51,54 +50,7 @@ class JET {
       this.jet.rotation.copy(physics.orientation);
     }
   }
-  setupAudio() {
-    // Create an AudioListener and add it to the camera
-    const listener = new THREE.AudioListener();
-    camera.add(listener);
-
-    // Create a global audio source for the first sound
-    this.speedUpAudio = new THREE.Audio(listener);
-    const audioLoader1 = new THREE.AudioLoader();
-    audioLoader1.load('./assets/audio/speedup.mp3', (buffer) => {
-        this.speedUpAudio.setBuffer(buffer);
-        this.speedUpAudio.setLoop(false);
-        this.speedUpAudio.setVolume(0.5);  // Adjust volume as needed
-    });
-
-    // Create a global audio source for the second sound
-    this.turnOnAudio = new THREE.Audio(listener);
-    const audioLoader2 = new THREE.AudioLoader();
-    audioLoader2.load('./assets/audio/turnon.mp3', (buffer) => {
-        this.turnOnAudio.setBuffer(buffer);
-        this.turnOnAudio.setLoop(false);
-        this.turnOnAudio.setVolume(0.5);  // Adjust volume as needed
-    });
-
-    // Attach the audios to the jet, but don't play them yet
-    this.jet.add(this.speedUpAudio);
-    this.jet.add(this.turnOnAudio);
 }
-
-playAudio(x) {
-  if(x===1){
-    this.turnOnAudio.play();
-  }
-else if(x===2){
-  this.speedUpAudio.play(); 
-}
-   
-}
-
-stopAudio() {
-    if (this.speedUpAudio && this.turnOnAudio) { // Stop if currently playing
-        this.speedUpAudio.stop();
-        this.turnOnAudio = false;
-    }
-    if (this.turnOnAudio && this.jetSoundPlaying2) { // Stop if currently playing
-        this.turnOnAudio.stop();
-        this.jetSoundPlaying2 = false;
-    }
-  }}
 
 let jet = new JET();
 // jet.scene.rotation.y(Math.PI)
@@ -110,7 +62,25 @@ function getWaveHeight(x, z) {
 
 init();
 
+let originalSettings = {
+  ambientLight: { intensity: 1.2 },
+  directionalLight: { intensity: 1.2, position: new THREE.Vector3(0, 100, 50), color: new THREE.Color(0xffffff) },
+  water: {
+    sunColor: new THREE.Color(0xffffff),
+    waterColor: new THREE.Color(0x44a0e6),
+    distortionScale: 3.7
+  },
+  sky: {
+    turbidity: 10,
+    rayleigh: 2,
+    mieCoefficient: 0.005,
+    sunPosition: new THREE.Vector3(1, 1, 0.5)
+  },
+  background: new THREE.Color(0x87CEEB) // Sky blue for daytime
+};
+
 function init() {
+  
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -237,6 +207,80 @@ water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
   controls.maxDistance = 1000000;
   controls.update();
 
+  let ambientLight, directionalLight;
+
+// Add lighting to the scene
+function addLights() {
+  // Daylight ambient light
+  ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // Bright ambient light for day
+  scene.add(ambientLight);
+
+  // Daylight directional light (Sun)
+  directionalLight = new THREE.DirectionalLight(0xffffff, 1.2); // Mimic the sun's light
+  directionalLight.position.set(0, 100, 50); // Light from above
+  scene.add(directionalLight);
+}
+
+addLights();
+
+// Function to switch to night mode
+function switchToNight() {
+  ambientLight.intensity = 0.2; // Dim ambient light
+  directionalLight.intensity = 0.3; // Reduce directional light intensity
+
+  // Change sky color to a dark blue
+  sky.material.uniforms['turbidity'].value = 2; // Less atmospheric scattering
+  sky.material.uniforms['rayleigh'].value = 0.1; // Darker sky
+  sky.material.uniforms['sunPosition'].value.set(-0.3, -1, -0.5); // Position the sun below the horizon for night
+  sky.material.uniforms['mieCoefficient'].value = 0.01; // Lower scattering for moonlight
+
+  // Darken water
+  water.material.uniforms['sunColor'].value.set(0x001122); // Darker reflection
+  water.material.uniforms['waterColor'].value.set(0x001e33); // Darker water color
+  water.material.uniforms['distortionScale'].value = 1.0; // Lower distortion for a calmer night sea
+
+  // Optionally, add some stars or moonlight
+  scene.background = new THREE.Color(0x000011); // Darker background to simulate night sky
+}
+
+// Function to switch to day mode
+function switchToDay() {
+  ambientLight.intensity = 1.0; // Brighten ambient light
+  directionalLight.intensity = 1.5; // Increase directional light intensity
+
+  // Update directional light to simulate the sun
+  directionalLight.position.set(100, 100, 50); // Sun higher in the sky
+  directionalLight.color.set(0xffddaa); // Warm sunlight color
+  directionalLight.castShadow = true; // Enable shadows from the sun
+  directionalLight.shadow.mapSize.width = 2048;
+  directionalLight.shadow.mapSize.height = 2048;
+
+  // Change sky back to daylight
+  sky.material.uniforms['turbidity'].value = 2; // Clear sky
+  sky.material.uniforms['rayleigh'].value = 1.5; // Normal daylight scattering
+  sky.material.uniforms['sunPosition'].value.set(1, 1, 0.5); // Position the sun for day
+  sky.material.uniforms['mieCoefficient'].value = 0.005; // Normal daylight scattering
+
+  // Lighten water
+  water.material.uniforms['sunColor'].value.set(0xffddaa); // Bright reflection of sun
+  water.material.uniforms['waterColor'].value.set(0x44aaff); // Clearer, more vivid water color
+  water.material.uniforms['distortionScale'].value = 4.0; // Moderate distortion for a lively sea during the day
+
+  // Reset background to a bright sky blue
+  scene.background = new THREE.Color(0x87CEEB); // Sky blue for daytime
+}
+
+
+// Listen for keypress events
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'N') {
+    switchToNight(); // Switch to night mode
+  }
+  if (e.key === 'B') {
+    switchToDay();
+  }
+});
+
 
 
   // // const jetskiFolder = gui.addFolder('Jet Ski');
@@ -245,15 +289,11 @@ water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
   // gui.add(jetSki, 'A', 0.1, 5.0).name('Cross-sectional Area');
   // gui.add(jetSki, 'powerEngine', 10000, 1000000).name('Engine Power');
   // gui.add(jetSki, 'velocityFan', 0, 100).name('Fan Velocity');
-let turnedOn =false;
+
  
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('keydown', function (e) {
     if (e.key === "ArrowUp") {
-      if(!turnedOn){
-        jet.playAudio(1);
-        turnedOn=true;
-      }
         throttle = 30;
         if (throttleDecrementInterval) {
             clearInterval(throttleDecrementInterval);
