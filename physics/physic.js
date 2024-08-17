@@ -35,6 +35,25 @@ export default class Physic {
     this.direction.set(0, 0, 1).applyEuler(this.orientation).normalize();
   }
 
+  reset() {
+    // Reset all properties to their initial states
+    this.jetski.position.set(0, 0, 0);  // Initial position
+    this.jetski.velocity.set(0, 0, 0);  // Reset velocity
+    this.jetski.acceleration.set(0, 0, 0);  // Reset acceleration
+
+    this.orientation.set(0, 0, 0);  // Reset orientation
+
+    // Reset thrust properties
+    // this.thrust.powerEngine = 0;
+    this.thrust.velocityFan.set(0, 0, 0);
+
+    // Reset drag properties if necessary
+    this.drag.drag_force.set(0, 0, 0);
+
+    // Reset other physics properties
+    this.deltaT = 0;
+  }
+
   calc_totForce() {
     let TF = new THREE.Vector3(0, 0, 0);
     this.updateDirection();

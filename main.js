@@ -312,9 +312,29 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'B') {
     switchToDay();
   }
+  if (e.key === 'R') {
+    resetToStart();
+}
 });
 
+function resetToStart() {
+  throttle = 0;
+  steeringAngle = 0;
+  physics.reset();
 
+  if (jet.jet) {
+      jet.jet.position.set(5, 0, 10); 
+      jet.jet.rotation.set(0, 0, 0);
+  }
+
+  camera.position.set(30, 30, 100); 
+  controls.target.set(0, 10, 0); 
+  controls.update(); 
+
+
+
+  turnedOn = false;
+}
 
   // // const jetskiFolder = gui.addFolder('Jet Ski');
   // gui.add(jetSki, 'mass', 1000, 100000).name('Mass');
