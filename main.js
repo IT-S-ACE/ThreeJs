@@ -40,6 +40,7 @@ class JET {
      /// gltf.scene.rotation.z = Math.PI/5;
       this.jet = gltf.scene;
       scene.add(gltf.scene);
+      this.setupAudio(); 
       animate();
     });
   }
@@ -50,7 +51,54 @@ class JET {
       this.jet.rotation.copy(physics.orientation);
     }
   }
+  setupAudio() {
+    // Create an AudioListener and add it to the camera
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    // Create a global audio source for the first sound
+    this.speedUpAudio = new THREE.Audio(listener);
+    const audioLoader1 = new THREE.AudioLoader();
+    audioLoader1.load('./assets/audio/speedup.mp3', (buffer) => {
+        this.speedUpAudio.setBuffer(buffer);
+        this.speedUpAudio.setLoop(false);
+        this.speedUpAudio.setVolume(0.5);  // Adjust volume as needed
+    });
+
+    // Create a global audio source for the second sound
+    this.turnOnAudio = new THREE.Audio(listener);
+    const audioLoader2 = new THREE.AudioLoader();
+    audioLoader2.load('./assets/audio/turnon.mp3', (buffer) => {
+        this.turnOnAudio.setBuffer(buffer);
+        this.turnOnAudio.setLoop(false);
+        this.turnOnAudio.setVolume(0.5);  // Adjust volume as needed
+    });
+
+    // Attach the audios to the jet, but don't play them yet
+    this.jet.add(this.speedUpAudio);
+    this.jet.add(this.turnOnAudio);
 }
+
+playAudio(x) {
+  if(x===1){
+    this.turnOnAudio.play();
+  }
+else if(x===2){
+  this.speedUpAudio.play(); 
+}
+   
+}
+
+stopAudio() {
+    if (this.speedUpAudio && this.turnOnAudio) { // Stop if currently playing
+        this.speedUpAudio.stop();
+        this.turnOnAudio = false;
+    }
+    if (this.turnOnAudio && this.jetSoundPlaying2) { // Stop if currently playing
+        this.turnOnAudio.stop();
+        this.jetSoundPlaying2 = false;
+    }
+  }}
 
 let jet = new JET();
 // jet.scene.rotation.y(Math.PI)
@@ -197,11 +245,15 @@ water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
   // gui.add(jetSki, 'A', 0.1, 5.0).name('Cross-sectional Area');
   // gui.add(jetSki, 'powerEngine', 10000, 1000000).name('Engine Power');
   // gui.add(jetSki, 'velocityFan', 0, 100).name('Fan Velocity');
-
+let turnedOn =false;
  
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('keydown', function (e) {
     if (e.key === "ArrowUp") {
+      if(!turnedOn){
+        jet.playAudio(1);
+        turnedOn=true;
+      }
         throttle = 30;
         if (throttleDecrementInterval) {
             clearInterval(throttleDecrementInterval);
