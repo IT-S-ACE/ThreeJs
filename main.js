@@ -275,30 +275,33 @@ function switchToNight() {
 
 // Function to switch to day mode
 function switchToDay() {
-  ambientLight.intensity = 1.0; // Brighten ambient light
-  directionalLight.intensity = 1.5; // Increase directional light intensity
+  // Restore original ambient light settings
+  ambientLight.intensity = 0.5; // Your original ambient light intensity
 
-  // Update directional light to simulate the sun
-  directionalLight.position.set(100, 100, 50); // Sun higher in the sky
-  directionalLight.color.set(0xffddaa); // Warm sunlight color
-  directionalLight.castShadow = true; // Enable shadows from the sun
+  // Restore the directional light (sun) settings
+  directionalLight.intensity = 1.0; // Original intensity of sunlight
+  directionalLight.position.set(100, 100, 100); // Restore sun position
+  directionalLight.color.set(0xffffff); // Original white sunlight color
+  directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 2048;
   directionalLight.shadow.mapSize.height = 2048;
 
-  // Change sky back to daylight
-  sky.material.uniforms['turbidity'].value = 2; // Clear sky
-  sky.material.uniforms['rayleigh'].value = 1.5; // Normal daylight scattering
-  sky.material.uniforms['sunPosition'].value.set(1, 1, 0.5); // Position the sun for day
-  sky.material.uniforms['mieCoefficient'].value = 0.005; // Normal daylight scattering
+  // Restore the sky settings
+  sky.material.uniforms['turbidity'].value = 10; // Default turbidity value
+  sky.material.uniforms['rayleigh'].value = 2; // Default rayleigh value
+  sky.material.uniforms['mieCoefficient'].value = 0.005; // Default mie coefficient
+  sky.material.uniforms['mieDirectionalG'].value = 0.8; // Original mieDirectionalG value
+  sky.material.uniforms['sunPosition'].value.copy(sun); // Restore original sun position
 
-  // Lighten water
-  water.material.uniforms['sunColor'].value.set(0xffddaa); // Bright reflection of sun
-  water.material.uniforms['waterColor'].value.set(0x44aaff); // Clearer, more vivid water color
-  water.material.uniforms['distortionScale'].value = 4.0; // Moderate distortion for a lively sea during the day
+  // Restore the water settings
+  water.material.uniforms['sunColor'].value.set(0xffffff); // Default sun reflection color
+  water.material.uniforms['waterColor'].value.set(0x44a0e6); // Original water color
+  water.material.uniforms['distortionScale'].value = 3.7; // Original distortion scale for water
 
-  // Reset background to a bright sky blue
-  scene.background = new THREE.Color(0x87CEEB); // Sky blue for daytime
+  // Restore the scene background
+  scene.background = null; // Set to null if you had no custom background
 }
+
 
 
 // Listen for keypress events
