@@ -36,21 +36,18 @@ export default class Physic {
   }
 
   reset() {
-    // Reset all properties to their initial states
-    this.jetski.position.set(0, 0, 0);  // Initial position
-    this.jetski.velocity.set(0, 0, 0);  // Reset velocity
-    this.jetski.acceleration.set(0, 0, 0);  // Reset acceleration
+   
+    this.jetski.position.set(0, 0, 0); 
+    this.jetski.velocity.set(0, 0, 0);  
+    this.jetski.acceleration.set(0, 0, 0);  
 
-    this.orientation.set(0, 0, 0);  // Reset orientation
+    this.orientation.set(0, 0, 0);  
 
-    // Reset thrust properties
-    // this.thrust.powerEngine = 0;
+   
     this.thrust.velocityFan.set(0, 0, 0);
 
-    // Reset drag properties if necessary
     this.drag.drag_force.set(0, 0, 0);
 
-    // Reset other physics properties
     this.deltaT = 0;
   }
 
