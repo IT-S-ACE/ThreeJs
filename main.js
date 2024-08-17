@@ -103,17 +103,29 @@ function init() {
 async function loadIcebergModel() {
     // Load a glTF resource
  
-    const iceberg_model6 = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
-    if (iceberg_model6) {
+    const iceberg_model = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
+    if (iceberg_model) {
       
-        iceberg_model6.scale.set(100, 100, 100);
-        iceberg_model6.position.set(5, 0, 1000);
-        iceberg_model6.traverse((child) => {
+        iceberg_model.scale.set(100, 100, 100);
+        iceberg_model.position.set(100, -50, 1000);
+        iceberg_model.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
             }
         });
-        scene.add(iceberg_model6);
+        scene.add(iceberg_model);
+    }
+    const iceberg_model2 = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
+    if (iceberg_model2) {
+      
+        iceberg_model2.scale.set(100, -80, 100);
+        iceberg_model2.position.set(5, 0, 2000);
+        iceberg_model2.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+            }
+        });
+        scene.add(iceberg_model2);
     }
 }
 loadIcebergModel();
@@ -320,30 +332,31 @@ function render() {
   water.material.uniforms['time'].value += 1.0 / 60.0;
   renderer.render(scene, camera);
 }
-
 function updateCamera() {
   if (jet.jet) {
-    // const offset = new THREE.Vector3(100, 100, 300); // Offset behind and above the jet (adjust as needed)
     const offset = new THREE.Vector3(0, 80, -250);
     const worldPosition = new THREE.Vector3();
-    
-    // Get the jet's current world position
+
+    // Get the jet ski's current world position
     jet.jet.getWorldPosition(worldPosition);
 
-    // Apply the offset relative to the jet's orientation
+    // Apply the offset relative to the jet ski's orientation
     const offsetRotated = offset.clone().applyQuaternion(jet.jet.quaternion);
 
     // Calculate the target position for the camera
     const targetPosition = worldPosition.clone().add(offsetRotated);
 
-    // Set the camera position directly to the target position
-    camera.position.copy(targetPosition);
+    // Set the camera position based on OrbitControls, then adjust its position to follow the jet ski
+    camera.position.lerp(targetPosition, 0.1); // Smooth transition
 
-    // Make the camera look at the jet's current position
+    // Make the camera look at the jet ski's current position
     camera.lookAt(worldPosition);
 
-    controls.target.copy(worldPosition); // Keep the OrbitControls target on the jet
+    // Update the OrbitControls to keep focusing on the jet ski
+    controls.target.copy(worldPosition);
+    controls.update(); // Update OrbitControls to reflect any changes
   }
 }
+
 
 
