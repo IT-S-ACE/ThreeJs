@@ -24,7 +24,7 @@ const gltfloader = new GLTFLoader();
 const physics = new Physic();
 let steeringAngle = 0;
 let rotationDecrementInterval;
-let throttle = 0.8;
+let throttle = 0.1;
 let throttleDecrementInterval;
 const planeSize = 10000;
 
@@ -349,7 +349,7 @@ function init() {
         jet.turnOnAudio.play();
         turnedOn = true;
       }
-      throttle = 25;
+      throttle = 1;
 
       if (turnedOn && !jet.turnOnAudio.isPlaying) {
         jet.speedUpAudio.play();
@@ -371,17 +371,18 @@ function init() {
       }
     }
     if (e.key === "ArrowRight") {
-      steeringAngle = steeringRate;
-      // throttle = 20;
-      if (steeringAngle > maxSteeringAngle) {
-        steeringAngle = maxSteeringAngle;
-      }
-    }
-    if (e.key === "ArrowLeft") {
+      
       steeringAngle = (-steeringRate);
       // throttle = 20;
       if (steeringAngle < -maxSteeringAngle) {
         steeringAngle = -maxSteeringAngle;
+      }
+    }
+    if (e.key === "ArrowLeft") {
+      steeringAngle = steeringRate;
+      // throttle = 20;
+      if (steeringAngle > maxSteeringAngle) {
+        steeringAngle = maxSteeringAngle;
       }
     }
   });
@@ -391,7 +392,7 @@ function init() {
       jet.speedUpAudio.stop();
       if (!throttleDecrementInterval) {
         throttleDecrementInterval = setInterval(() => {
-          throttle -= 1;
+          throttle -= 0.25;
           if (throttle <= 0) {
             throttle = 0;
             clearInterval(throttleDecrementInterval);

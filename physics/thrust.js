@@ -9,7 +9,7 @@ export default class Thrust {
   }
 
   update(throttle) {
-    let thrustMagnitude = this.powerEngine * throttle;
+    let thrustMagnitude = this.powerEngine * throttle * this.velocityFan.length();
     this.thrust_force = this.direction.clone().multiplyScalar(thrustMagnitude);
   }
 }
