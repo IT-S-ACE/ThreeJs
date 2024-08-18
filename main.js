@@ -10,6 +10,7 @@ import * as dat from 'dat.gui';
 import JetSki from './physics/jetski';
 import ModelLoaders from './ModelLoaders';
 import SceneManager from './SceneManager';
+import nipplejs from 'nipplejs';
 
 
 const gui = new dat.GUI();
@@ -34,10 +35,11 @@ class JET {
   constructor() {
     gltfloader.load('./assets/jetmodel/untitled.glb', (gltf) => {
       gltf.scene.scale.set(0.4, 0.4, 0.4);
+      this.jet = gltf.scene;
+      this.boundingBox = new THREE.Box3().setFromObject(this.jet);  // Create bounding box
 
       gltf.scene.position.set(5, 0, 10);
       /// gltf.scene.rotation.z = Math.PI/5;
-      this.jet = gltf.scene;
       scene.add(gltf.scene);
       this.setupAudio();
       animate();
@@ -48,6 +50,7 @@ class JET {
     if (this.jet) {
       this.jet.position.copy(physics.jetski.position);
       this.jet.rotation.copy(physics.orientation);
+      this.boundingBox.setFromObject(this.jet);  // Update bounding box position and size
     }
   }
 
@@ -87,6 +90,17 @@ function getWaveHeight(x, z) {
   const waveAmplitude = 0.9;
   return Math.sin(x * waveFrequency) * waveAmplitude + Math.cos(z * waveFrequency) * waveAmplitude;
 }
+
+let joystickManager = nipplejs.create({
+  zone: document.body,
+  mode: 'static',
+  position: { left: '50%', bottom: '50px' },
+  size: 200,
+  color: 'blue',
+  restOpacity: 0.5,
+  lockX: false,  // Allow movement in both X and Y
+  lockY: false
+});
 
 init();
 
@@ -159,6 +173,7 @@ function init() {
           child.castShadow = true;
         }
       });
+      iceberg_model.boundingBox = new THREE.Box3().setFromObject(iceberg_model); 
       scene.add(iceberg_model);
     }
     const iceberg_model2 = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
@@ -171,6 +186,7 @@ function init() {
           child.castShadow = true;
         }
       });
+      iceberg_model2.boundingBox = new THREE.Box3().setFromObject(iceberg_model2); 
       scene.add(iceberg_model2);
     }
   }
@@ -334,6 +350,10 @@ function init() {
     turnedOn = false;
   }
 
+
+
+
+
   // // const jetskiFolder = gui.addFolder('Jet Ski');
   // gui.add(jetSki, 'mass', 1000, 100000).name('Mass');
   // gui.add(jetSki, 'dragCon', 0.1, 2.0).name('Drag Coefficient');
@@ -341,6 +361,48 @@ function init() {
   // gui.add(jetSki, 'powerEngine', 10000, 1000000).name('Engine Power');
   // gui.add(jetSki, 'velocityFan', 0, 100).name('Fan Velocity');
   let turnedOn = false;
+
+
+
+
+
+  joystickManager.on('move', (evt, data) => {
+    if (data.direction) {
+        // Calculate throttle based on joystick position
+        const force = data.force; // Magnitude of the joystick movement (0 to 1)
+        throttle = force/3;  // Max throttle corresponds to the maximum force
+console.log(throttle);
+        // Calculate steering angle
+        // const angle = data.angle.radian; // Angle in radians
+        // steeringAngle = angle * maxSteeringAngle;  // Map the angle to your steering range
+
+        if (data.direction.angle === 'up' && !turnedOn) {
+            jet.turnOnAudio.play();
+            turnedOn = true;
+        }
+    }
+});
+
+joystickManager.on('end', () => {
+    // Stop the jetski when the joystick is released
+   
+      jet.speedUpAudio.stop();
+      if (!throttleDecrementInterval) {
+        throttleDecrementInterval = setInterval(() => {
+          throttle -= 0.25;
+          if (throttle <= 0) {
+            throttle = 0;
+            clearInterval(throttleDecrementInterval);
+            throttleDecrementInterval = null;
+          }
+        }, 1000); // Decrease throttle every second
+      }
+    
+    jet.speedUpAudio.stop();
+});
+
+
+
 
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('keydown', function (e) {
@@ -463,25 +525,69 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function animate() {
-  console.log(steeringAngle)
+document.addEventListener("DOMContentLoaded", () => {
+  const accelerationElement = document.getElementById('acceleration');
+  const positionElement = document.getElementById('position');
+  const thrustElement = document.getElementById('thrust');
+  const velocityElement = document.getElementById('velocity');
+  const dragElement = document.getElementById('drag');
+  const deltaTElement = document.getElementById('deltaT');
 
-  render();
-  updateCamera();
-  controls.update();
+  function animate() {
+    requestAnimationFrame(animate);
 
-  physics.update(steeringAngle, throttle);
+    // Update physics and other logic
+    physics.update(steeringAngle, throttle);
+    if (jet) jet.update();
 
-  if (jet) jet.update();
+    if (accelerationElement) {
+      accelerationElement.innerText = `Acceleration: (${physics.acceleration.z.toFixed(2)})`;
+    }
 
-  document.getElementById('acceleration').innerText = `Acceleration: (${physics.acceleration.z.toFixed(2)})`;
-  document.getElementById('position').innerText = `Position: (${physics.jetski.position.x.toFixed(2)}, ${physics.jetski.position.y.toFixed(2)}, ${physics.jetski.position.z.toFixed(2)})`;
-  document.getElementById('thrust').innerText = `Thrust: ${physics.thrust.powerEngine},${physics.thrust.velocityFan.x}`;
-  document.getElementById('velocity').innerText = `Velocity: (${physics.jetski.velocity.x.toFixed(2)}, ${physics.velocity.y.toFixed(2)}, ${physics.jetski.velocity.z.toFixed(2)})`;
-  document.getElementById('drag').innerText = `Drag: (${physics.drag.coefficient},${physics.drag.area},${physics.drag.fluidDensity},${physics.drag.drag_force.z})`;
-  document.getElementById('deltaT').innerText = `Delta T: ${physics.deltaT}`;
-  requestAnimationFrame(animate);
+    if (positionElement) {
+      positionElement.innerText = `Position: (${physics.jetski.position.x.toFixed(2)}, ${physics.jetski.position.y.toFixed(2)}, ${physics.jetski.position.z.toFixed(2)})`;
+    }
+
+    if (thrustElement) {
+      thrustElement.innerText = `Thrust: ${physics.thrust.powerEngine}, ${physics.thrust.velocityFan.x}`;
+    }
+
+    if (velocityElement) {
+      velocityElement.innerText = `Velocity: (${physics.jetski.velocity.x.toFixed(2)}, ${physics.velocity.y.toFixed(2)}, ${physics.jetski.velocity.z.toFixed(2)})`;
+    }
+
+    if (dragElement) {
+      dragElement.innerText = `Drag: (${physics.drag.coefficient}, ${physics.drag.area}, ${physics.drag.fluidDensity}, ${physics.drag.drag_force.z})`;
+    }
+
+    if (deltaTElement) {
+      deltaTElement.innerText = `Delta T: ${physics.deltaT}`;
+    }
+
+    // Check for collisions
+    scene.traverse((object) => {
+      if (object.boundingBox && jet.jet) {
+        if (jet.boundingBox.intersectsBox(object.boundingBox)) {
+          handleCollision();  // Function to handle collision
+        }
+      }
+    });
+
+    render();
+    updateCamera();
+    controls.update();
+  }
+
+  animate();
+});
+
+
+function handleCollision() {
+  // Logic to stop the jet ski when a collision is detected
+  throttle = 0;
+  // physics.velocity.set(0, 0, 0);  // Stop the jet ski
 }
+
 
 function render() {
   water.material.uniforms['time'].value += 1.0 / 60.0;

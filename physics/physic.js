@@ -41,6 +41,9 @@ export default class Physic {
     };
   }
 
+  
+
+
   updateDirection() {
     this.direction.set(0, 0, 1).applyEuler(this.orientation).normalize();
   }
