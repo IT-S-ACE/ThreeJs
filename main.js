@@ -34,10 +34,11 @@ class JET {
   constructor() {
     gltfloader.load('./assets/jetmodel/untitled.glb', (gltf) => {
       gltf.scene.scale.set(0.4, 0.4, 0.4);
+      this.jet = gltf.scene;
+      this.boundingBox = new THREE.Box3().setFromObject(this.jet);  // Create bounding box
 
       gltf.scene.position.set(5, 0, 10);
       /// gltf.scene.rotation.z = Math.PI/5;
-      this.jet = gltf.scene;
       scene.add(gltf.scene);
       this.setupAudio();
       animate();
@@ -48,6 +49,7 @@ class JET {
     if (this.jet) {
       this.jet.position.copy(physics.jetski.position);
       this.jet.rotation.copy(physics.orientation);
+      this.boundingBox.setFromObject(this.jet);  // Update bounding box position and size
     }
   }
 
@@ -159,6 +161,7 @@ function init() {
           child.castShadow = true;
         }
       });
+      iceberg_model.boundingBox = new THREE.Box3().setFromObject(iceberg_model); 
       scene.add(iceberg_model);
     }
     const iceberg_model2 = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
@@ -171,6 +174,7 @@ function init() {
           child.castShadow = true;
         }
       });
+      iceberg_model2.boundingBox = new THREE.Box3().setFromObject(iceberg_model2); 
       scene.add(iceberg_model2);
     }
   }
@@ -462,26 +466,33 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
 function animate() {
-  console.log(steeringAngle)
+  requestAnimationFrame(animate);
+
+  // Update physics and other logic
+  physics.update(steeringAngle, throttle);
+  if (jet) jet.update();
+
+  // Check for collisions
+  scene.traverse((object) => {
+    if (object.boundingBox && jet.jet) {
+      if (jet.boundingBox.intersectsBox(object.boundingBox)) {
+        handleCollision();  // Function to handle collision
+      }
+    }
+  });
 
   render();
   updateCamera();
   controls.update();
-
-  physics.update(steeringAngle, throttle);
-
-  if (jet) jet.update();
-
-  document.getElementById('acceleration').innerText = `Acceleration: (${physics.acceleration.z.toFixed(2)})`;
-  document.getElementById('position').innerText = `Position: (${physics.jetski.position.x.toFixed(2)}, ${physics.jetski.position.y.toFixed(2)}, ${physics.jetski.position.z.toFixed(2)})`;
-  document.getElementById('thrust').innerText = `Thrust: ${physics.thrust.powerEngine},${physics.thrust.velocityFan.x}`;
-  document.getElementById('velocity').innerText = `Velocity: (${physics.jetski.velocity.x.toFixed(2)}, ${physics.velocity.y.toFixed(2)}, ${physics.jetski.velocity.z.toFixed(2)})`;
-  document.getElementById('drag').innerText = `Drag: (${physics.drag.coefficient},${physics.drag.area},${physics.drag.fluidDensity},${physics.drag.drag_force.z})`;
-  document.getElementById('deltaT').innerText = `Delta T: ${physics.deltaT}`;
-  requestAnimationFrame(animate);
 }
+
+function handleCollision() {
+  // Logic to stop the jet ski when a collision is detected
+  throttle = 0;
+  // physics.velocity.set(0, 0, 0);  // Stop the jet ski
+}
+
 
 function render() {
   water.material.uniforms['time'].value += 1.0 / 60.0;
