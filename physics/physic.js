@@ -20,7 +20,7 @@ export default class Physic {
     this.buoyancy = new Buoyancy(this.jetski.VODPJ, this.water.rho, this.g);
     this.drag = new Drag(this.jetski.dragCon, this.jetski.A, this.water.rho, this.jetski.velocity, this.direction);
     this.thrust = new Thrust(this.jetski.powerEngine, this.jetski.velocityFan, this.direction);
-    this.weight = new Weight(this.jetski.mass, this.g);
+    this.weight = new Weight(this.jetski.mass, this.g, this.jetski);
     this.rudder = new Rudder(this.jetski); // Initialize Rudder
     this.deltaT = 0.02; // Time step
   
@@ -28,7 +28,17 @@ export default class Physic {
     this.angularAcceleration = new THREE.Vector3(0, 0, 0);
     this.angularVelocity = new THREE.Vector3(0, 0, 0);
     this.orientation = new THREE.Euler(0, 0, 0); // Orientation (pitch, yaw, roll)
-   this.maxAngularVelocity = Math.PI/20;
+    this.maxAngularVelocity = Math.PI / 20;
+  }
+
+  getParams() {
+    return {
+      mass: this.jetski.mass,
+      dragCon: this.jetski.dragCon,
+      A: this.jetski.A,
+      powerEngine: this.jetski.powerEngine,
+      length: this.jetski.length
+    };
   }
 
   updateDirection() {
@@ -36,14 +46,12 @@ export default class Physic {
   }
 
   reset() {
-   
-    this.jetski.position.set(0, 0, 0); 
-    this.jetski.velocity.set(0, 0, 0);  
-    this.jetski.acceleration.set(0, 0, 0);  
+    this.jetski.position.set(0, 0, 0);
+    this.jetski.velocity.set(0, 0, 0);
+    this.jetski.acceleration.set(0, 0, 0);
 
-    this.orientation.set(0, 0, 0);  
+    this.orientation.set(0, 0, 0);
 
-   
     this.thrust.velocityFan.set(0, 0, 0);
 
     this.drag.drag_force.set(0, 0, 0);
@@ -75,7 +83,6 @@ export default class Physic {
     this.jetski.velocity.add(velChange);
   }
 
-  
   calc_distance() {
     let des = this.velocity.clone().multiplyScalar(this.deltaT);
     this.position.add(des);
@@ -110,6 +117,17 @@ export default class Physic {
     this.orientation.z += deltaOrientation.z;
   }
 
+  // Adjust JetSki y position based on gravity condition
+  adjustPositionBasedOnGravity() {
+    if (this.g.y < -9.82) {
+      // If gravity is less than -9.82, decrease the y position
+      this.jetski.position.y -= Math.abs(this.g.y - (-9.82)) * this.deltaT;
+    } else if (this.g.y > -9.82) {
+      // If gravity is greater than -9.82, increase the y position
+      this.jetski.position.y += Math.abs(this.g.y - (-9.82)) * this.deltaT;
+    }
+  }
+
   update(steeringAngle, throttle) {
     this.rudder.update(steeringAngle); // Update rudder with the new steering angle and velocity
     this.weight.update();
@@ -120,6 +138,10 @@ export default class Physic {
     this.calc_totForce();
     this.calc_acceleration();
     this.calc_velocity();
+
+    // Adjust JetSki y position based on the gravity condition
+    this.adjustPositionBasedOnGravity();
+
     this.calc_distance();
 
     this.calc_totTorque();
