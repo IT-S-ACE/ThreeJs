@@ -10,6 +10,7 @@ import * as dat from 'dat.gui';
 import JetSki from './physics/jetski';
 import ModelLoaders from './ModelLoaders';
 import SceneManager from './SceneManager';
+import nipplejs from 'nipplejs';
 
 
 const gui = new dat.GUI();
@@ -89,6 +90,17 @@ function getWaveHeight(x, z) {
   const waveAmplitude = 0.9;
   return Math.sin(x * waveFrequency) * waveAmplitude + Math.cos(z * waveFrequency) * waveAmplitude;
 }
+
+let joystickManager = nipplejs.create({
+  zone: document.body,
+  mode: 'static',
+  position: { left: '50%', bottom: '50px' },
+  size: 200,
+  color: 'blue',
+  restOpacity: 0.5,
+  lockX: false,  // Allow movement in both X and Y
+  lockY: false
+});
 
 init();
 
@@ -338,6 +350,10 @@ function init() {
     turnedOn = false;
   }
 
+
+
+
+
   // // const jetskiFolder = gui.addFolder('Jet Ski');
   // gui.add(jetSki, 'mass', 1000, 100000).name('Mass');
   // gui.add(jetSki, 'dragCon', 0.1, 2.0).name('Drag Coefficient');
@@ -345,6 +361,48 @@ function init() {
   // gui.add(jetSki, 'powerEngine', 10000, 1000000).name('Engine Power');
   // gui.add(jetSki, 'velocityFan', 0, 100).name('Fan Velocity');
   let turnedOn = false;
+
+
+
+
+
+  joystickManager.on('move', (evt, data) => {
+    if (data.direction) {
+        // Calculate throttle based on joystick position
+        const force = data.force; // Magnitude of the joystick movement (0 to 1)
+        throttle = force/3;  // Max throttle corresponds to the maximum force
+console.log(throttle);
+        // Calculate steering angle
+        // const angle = data.angle.radian; // Angle in radians
+        // steeringAngle = angle * maxSteeringAngle;  // Map the angle to your steering range
+
+        if (data.direction.angle === 'up' && !turnedOn) {
+            jet.turnOnAudio.play();
+            turnedOn = true;
+        }
+    }
+});
+
+joystickManager.on('end', () => {
+    // Stop the jetski when the joystick is released
+   
+      jet.speedUpAudio.stop();
+      if (!throttleDecrementInterval) {
+        throttleDecrementInterval = setInterval(() => {
+          throttle -= 0.25;
+          if (throttle <= 0) {
+            throttle = 0;
+            clearInterval(throttleDecrementInterval);
+            throttleDecrementInterval = null;
+          }
+        }, 1000); // Decrease throttle every second
+      }
+    
+    jet.speedUpAudio.stop();
+});
+
+
+
 
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('keydown', function (e) {
