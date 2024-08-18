@@ -9,7 +9,7 @@ import Rudder from './RuderF';
 
 export default class Physic {
   constructor() {
-    this.direction = new THREE.Vector3(0, 0, 1);
+    this.direction = new THREE.Vector3(1, 0, 1);
     this.jetski = new JetSki();
     this.g = new THREE.Vector3(0, -9.82, 0);
     this.water = new Water();

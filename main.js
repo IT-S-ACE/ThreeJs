@@ -14,12 +14,11 @@ import SceneManager from './SceneManager';
 
 const gui = new dat.GUI();
 
-
 let camera, scene, renderer;
 let controls, water, sun;
 const steeringRate = Math.PI / 90; // معدل التغيير لزاوية التوجيه
-  const maxSteeringAngle = Math.PI / 9; // أقصى زاوية توجيه (30 درجة)
-  
+const maxSteeringAngle = Math.PI / 9; // أقصى زاوية توجيه (30 درجة)
+
 const raycaster = new THREE.Raycaster();
 const gltfloader = new GLTFLoader();
 const physics = new Physic();
@@ -37,10 +36,10 @@ class JET {
       gltf.scene.scale.set(0.4, 0.4, 0.4);
 
       gltf.scene.position.set(5, 0, 10);
-     /// gltf.scene.rotation.z = Math.PI/5;
+      /// gltf.scene.rotation.z = Math.PI/5;
       this.jet = gltf.scene;
       scene.add(gltf.scene);
-      this.setupAudio(); 
+      this.setupAudio();
       animate();
     });
   }
@@ -51,6 +50,7 @@ class JET {
       this.jet.rotation.copy(physics.orientation);
     }
   }
+
   setupAudio() {
     // Create an AudioListener and add it to the camera
     const listener = new THREE.AudioListener();
@@ -60,26 +60,24 @@ class JET {
     this.speedUpAudio = new THREE.Audio(listener);
     const audioLoader1 = new THREE.AudioLoader();
     audioLoader1.load('./assets/audio/speedup.mp3', (buffer) => {
-        this.speedUpAudio.setBuffer(buffer);
-        this.speedUpAudio.setLoop(false);
-        this.speedUpAudio.setVolume(0.5);  // Adjust volume as needed
+      this.speedUpAudio.setBuffer(buffer);
+      this.speedUpAudio.setLoop(false);
+      this.speedUpAudio.setVolume(0.5);  // Adjust volume as needed
     });
 
     // Create a global audio source for the second sound
     this.turnOnAudio = new THREE.Audio(listener);
     const audioLoader2 = new THREE.AudioLoader();
     audioLoader2.load('./assets/audio/turnon.mp3', (buffer) => {
-        this.turnOnAudio.setBuffer(buffer);
-        this.turnOnAudio.setLoop(false);
-        this.turnOnAudio.setVolume(0.5);  // Adjust volume as needed
+      this.turnOnAudio.setBuffer(buffer);
+      this.turnOnAudio.setLoop(false);
+      this.turnOnAudio.setVolume(0.5);  // Adjust volume as needed
     });
 
     // Attach the audios to the jet, but don't play them yet
     this.jet.add(this.speedUpAudio);
     this.jet.add(this.turnOnAudio);
-}
-
-
+  }
 }
 
 let jet = new JET();
@@ -110,7 +108,7 @@ let originalSettings = {
 };
 
 function init() {
-  
+
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -147,36 +145,36 @@ function init() {
   const modelLoaders = new ModelLoaders();
   const sceneManager = new SceneManager('Web_GL');
 
-//Load the icebergs
-async function loadIcebergModel() {
+  //Load the icebergs
+  async function loadIcebergModel() {
     // Load a glTF resource
- 
+
     const iceberg_model = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
     if (iceberg_model) {
-      
-        iceberg_model.scale.set(100, 100, 100);
-        iceberg_model.position.set(100, -50, 1000);
-        iceberg_model.traverse((child) => {
-            if (child.isMesh) {
-                child.castShadow = true;
-            }
-        });
-        scene.add(iceberg_model);
+
+      iceberg_model.scale.set(100, 100, 100);
+      iceberg_model.position.set(100, -50, 1000);
+      iceberg_model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+        }
+      });
+      scene.add(iceberg_model);
     }
     const iceberg_model2 = await modelLoaders.load_GLTF_Model('/resources/models/iceberg/scene.gltf');
     if (iceberg_model2) {
-      
-        iceberg_model2.scale.set(100, -80, 100);
-        iceberg_model2.position.set(5, 0, 2000);
-        iceberg_model2.traverse((child) => {
-            if (child.isMesh) {
-                child.castShadow = true;
-            }
-        });
-        scene.add(iceberg_model2);
+
+      iceberg_model2.scale.set(100, -80, 100);
+      iceberg_model2.position.set(5, 0, 2000);
+      iceberg_model2.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+        }
+      });
+      scene.add(iceberg_model2);
     }
-}
-loadIcebergModel();
+  }
+  loadIcebergModel();
 
 
 
@@ -215,9 +213,9 @@ loadIcebergModel();
     water.material.uniforms['sunDirection'].value.copy(sun).normalize();
 
     // Update water material settings
-water.material.uniforms['sunColor'].value.set(0x0077ff); // Change to a different color
-water.material.uniforms['waterColor'].value.set(0x001e66); // Darker water color for more realism
-water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
+    water.material.uniforms['sunColor'].value.set(0x0077ff); // Change to a different color
+    water.material.uniforms['waterColor'].value.set(0x001e66); // Darker water color for more realism
+    water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
 
     if (renderTarget !== undefined) renderTarget.dispose();
 
@@ -225,7 +223,7 @@ water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
     renderTarget = pmremGenerator.fromScene(sceneEnv);
     scene.add(sky);
 
-    
+
     scene.environment = renderTarget.texture;
   }
 
@@ -239,102 +237,102 @@ water.material.uniforms['distortionScale'].value = 5.0; // Increase distortion
 
   let ambientLight, directionalLight;
 
-// Add lighting to the scene
-function addLights() {
-  // Daylight ambient light
-  ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // Bright ambient light for day
-  scene.add(ambientLight);
+  // Add lighting to the scene
+  function addLights() {
+    // Daylight ambient light
+    ambientLight = new THREE.AmbientLight(0xffffff, 1.2); // Bright ambient light for day
+    scene.add(ambientLight);
 
-  // Daylight directional light (Sun)
-  directionalLight = new THREE.DirectionalLight(0xffffff, 1.2); // Mimic the sun's light
-  directionalLight.position.set(0, 100, 50); // Light from above
-  scene.add(directionalLight);
-}
-
-addLights();
-
-// Function to switch to night mode
-function switchToNight() {
-  ambientLight.intensity = 0.2; // Dim ambient light
-  directionalLight.intensity = 0.3; // Reduce directional light intensity
-
-  // Change sky color to a dark blue
-  sky.material.uniforms['turbidity'].value = 2; // Less atmospheric scattering
-  sky.material.uniforms['rayleigh'].value = 0.1; // Darker sky
-  sky.material.uniforms['sunPosition'].value.set(-0.3, -1, -0.5); // Position the sun below the horizon for night
-  sky.material.uniforms['mieCoefficient'].value = 0.01; // Lower scattering for moonlight
-
-  // Darken water
-  water.material.uniforms['sunColor'].value.set(0x001122); // Darker reflection
-  water.material.uniforms['waterColor'].value.set(0x001e33); // Darker water color
-  water.material.uniforms['distortionScale'].value = 1.0; // Lower distortion for a calmer night sea
-
-  // Optionally, add some stars or moonlight
-  scene.background = new THREE.Color(0x000011); // Darker background to simulate night sky
-}
-
-// Function to switch to day mode
-function switchToDay() {
-  // Restore original ambient light settings
-  ambientLight.intensity = 0.5; // Your original ambient light intensity
-
-  // Restore the directional light (sun) settings
-  directionalLight.intensity = 1.0; // Original intensity of sunlight
-  directionalLight.position.set(100, 100, 100); // Restore sun position
-  directionalLight.color.set(0xffffff); // Original white sunlight color
-  directionalLight.castShadow = true;
-  directionalLight.shadow.mapSize.width = 2048;
-  directionalLight.shadow.mapSize.height = 2048;
-
-  // Restore the sky settings
-  sky.material.uniforms['turbidity'].value = 10; // Default turbidity value
-  sky.material.uniforms['rayleigh'].value = 2; // Default rayleigh value
-  sky.material.uniforms['mieCoefficient'].value = 0.005; // Default mie coefficient
-  sky.material.uniforms['mieDirectionalG'].value = 0.8; // Original mieDirectionalG value
-  sky.material.uniforms['sunPosition'].value.copy(sun); // Restore original sun position
-
-  // Restore the water settings
-  water.material.uniforms['sunColor'].value.set(0xffffff); // Default sun reflection color
-  water.material.uniforms['waterColor'].value.set(0x44a0e6); // Original water color
-  water.material.uniforms['distortionScale'].value = 3.7; // Original distortion scale for water
-
-  // Restore the scene background
-  scene.background = null; // Set to null if you had no custom background
-}
-
-
-
-// Listen for keypress events
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'N') {
-    switchToNight(); // Switch to night mode
+    // Daylight directional light (Sun)
+    directionalLight = new THREE.DirectionalLight(0xffffff, 1.2); // Mimic the sun's light
+    directionalLight.position.set(0, 100, 50); // Light from above
+    scene.add(directionalLight);
   }
-  if (e.key === 'B') {
-    switchToDay();
+
+  addLights();
+
+  // Function to switch to night mode
+  function switchToNight() {
+    ambientLight.intensity = 0.2; // Dim ambient light
+    directionalLight.intensity = 0.3; // Reduce directional light intensity
+
+    // Change sky color to a dark blue
+    sky.material.uniforms['turbidity'].value = 2; // Less atmospheric scattering
+    sky.material.uniforms['rayleigh'].value = 0.1; // Darker sky
+    sky.material.uniforms['sunPosition'].value.set(-0.3, -1, -0.5); // Position the sun below the horizon for night
+    sky.material.uniforms['mieCoefficient'].value = 0.01; // Lower scattering for moonlight
+
+    // Darken water
+    water.material.uniforms['sunColor'].value.set(0x001122); // Darker reflection
+    water.material.uniforms['waterColor'].value.set(0x001e33); // Darker water color
+    water.material.uniforms['distortionScale'].value = 1.0; // Lower distortion for a calmer night sea
+
+    // Optionally, add some stars or moonlight
+    scene.background = new THREE.Color(0x000011); // Darker background to simulate night sky
   }
-  if (e.key === 'R') {
-    resetToStart();
-}
-});
 
-function resetToStart() {
-  throttle = 0;
-  steeringAngle = 0;
-  physics.reset();
+  // Function to switch to day mode
+  function switchToDay() {
+    // Restore original ambient light settings
+    ambientLight.intensity = 0.5; // Your original ambient light intensity
 
-  if (jet.jet) {
-      jet.jet.position.set(5, 0, 10); 
+    // Restore the directional light (sun) settings
+    directionalLight.intensity = 1.0; // Original intensity of sunlight
+    directionalLight.position.set(100, 100, 100); // Restore sun position
+    directionalLight.color.set(0xffffff); // Original white sunlight color
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+
+    // Restore the sky settings
+    sky.material.uniforms['turbidity'].value = 10; // Default turbidity value
+    sky.material.uniforms['rayleigh'].value = 2; // Default rayleigh value
+    sky.material.uniforms['mieCoefficient'].value = 0.005; // Default mie coefficient
+    sky.material.uniforms['mieDirectionalG'].value = 0.8; // Original mieDirectionalG value
+    sky.material.uniforms['sunPosition'].value.copy(sun); // Restore original sun position
+
+    // Restore the water settings
+    water.material.uniforms['sunColor'].value.set(0xffffff); // Default sun reflection color
+    water.material.uniforms['waterColor'].value.set(0x44a0e6); // Original water color
+    water.material.uniforms['distortionScale'].value = 3.7; // Original distortion scale for water
+
+    // Restore the scene background
+    scene.background = null; // Set to null if you had no custom background
+  }
+
+
+
+  // Listen for keypress events
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'N') {
+      switchToNight(); // Switch to night mode
+    }
+    if (e.key === 'B') {
+      switchToDay();
+    }
+    if (e.key === 'R') {
+      resetToStart();
+    }
+  });
+
+  function resetToStart() {
+    throttle = 0;
+    steeringAngle = 0;
+    physics.reset();
+
+    if (jet.jet) {
+      jet.jet.position.set(5, 0, 10);
       jet.jet.rotation.set(0, 0, 0);
+    }
+
+    camera.position.set(30, 30, 100);
+    controls.target.set(0, 10, 0);
+    controls.update();
+
+
+
+    turnedOn = false;
   }
-
-  camera.position.set(30, 30, 100); 
-  controls.target.set(0, 10, 0); 
-  controls.update(); 
-
-
-
-  turnedOn = false;
-}
 
   // // const jetskiFolder = gui.addFolder('Jet Ski');
   // gui.add(jetSki, 'mass', 1000, 100000).name('Mass');
@@ -342,120 +340,120 @@ function resetToStart() {
   // gui.add(jetSki, 'A', 0.1, 5.0).name('Cross-sectional Area');
   // gui.add(jetSki, 'powerEngine', 10000, 1000000).name('Engine Power');
   // gui.add(jetSki, 'velocityFan', 0, 100).name('Fan Velocity');
-let turnedOn=false;
- 
+  let turnedOn = false;
+
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('keydown', function (e) {
     if (e.key === "ArrowUp") {
-      if(!turnedOn){
+      if (!turnedOn) {
         jet.turnOnAudio.play();
-        turnedOn=true;
+        turnedOn = true;
       }
-        throttle = 30;
+      throttle = 25;
 
-        if(turnedOn&&!jet.turnOnAudio.isPlaying){
-          jet.speedUpAudio.play();
+      if (turnedOn && !jet.turnOnAudio.isPlaying) {
+        jet.speedUpAudio.play();
 
-        }
+      }
 
-        if (throttleDecrementInterval) {
-            clearInterval(throttleDecrementInterval);
-            throttleDecrementInterval = null;
-        }
+      if (throttleDecrementInterval) {
+        clearInterval(throttleDecrementInterval);
+        throttleDecrementInterval = null;
+      }
     }
     if (e.key === "ArrowDown") {
-        throttle = 0;
-        steeringAngle = 0
-        // this.physics.velocity =0
-        if (throttleDecrementInterval) {
-            clearInterval(throttleDecrementInterval);
-            throttleDecrementInterval = null;
-        }
+      throttle = 0;
+      steeringAngle = 0
+      // this.physics.velocity =0
+      if (throttleDecrementInterval) {
+        clearInterval(throttleDecrementInterval);
+        throttleDecrementInterval = null;
+      }
     }
     if (e.key === "ArrowRight") {
-        steeringAngle = steeringRate;
-        // throttle = 20;
-        if (steeringAngle > maxSteeringAngle) {
-            steeringAngle = maxSteeringAngle;
-        }
+      steeringAngle = steeringRate;
+      // throttle = 20;
+      if (steeringAngle > maxSteeringAngle) {
+        steeringAngle = maxSteeringAngle;
+      }
     }
     if (e.key === "ArrowLeft") {
-        steeringAngle = (-steeringRate);
-        // throttle = 20;
-        if (steeringAngle < -maxSteeringAngle) {
-            steeringAngle = -maxSteeringAngle;
-        }
+      steeringAngle = (-steeringRate);
+      // throttle = 20;
+      if (steeringAngle < -maxSteeringAngle) {
+        steeringAngle = -maxSteeringAngle;
+      }
     }
-});
+  });
 
-window.addEventListener('keyup', function (e) {
-   if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-    jet.speedUpAudio.stop();
-        if (!throttleDecrementInterval) {
-            throttleDecrementInterval = setInterval(() => {
-                throttle -= 1;
-                if (throttle <= 0) {
-                    throttle = 0;
-                    clearInterval(throttleDecrementInterval);
-                    throttleDecrementInterval = null;
-                }
-            }, 1000); // Decrease throttle every second
-        }
+  window.addEventListener('keyup', function (e) {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      jet.speedUpAudio.stop();
+      if (!throttleDecrementInterval) {
+        throttleDecrementInterval = setInterval(() => {
+          throttle -= 1;
+          if (throttle <= 0) {
+            throttle = 0;
+            clearInterval(throttleDecrementInterval);
+            throttleDecrementInterval = null;
+          }
+        }, 1000); // Decrease throttle every second
+      }
     }
 
-  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-    if (steeringAngle > 0) {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      if (steeringAngle > 0) {
         steeringAngle -= steeringRate;
         if (steeringAngle < 0) {
-            steeringAngle = 0;
+          steeringAngle = 0;
         }
-    } else if (steeringAngle < 0) {
+      } else if (steeringAngle < 0) {
         steeringAngle += steeringRate;
         if (steeringAngle > 0) {
-            steeringAngle = 0;
+          steeringAngle = 0;
         }
-    }
+      }
 
-    // If throttle is 0, start reducing the steering angle over time
-    if (throttle === 0 && !rotationDecrementInterval) {
+      // If throttle is 0, start reducing the steering angle over time
+      if (throttle === 0 && !rotationDecrementInterval) {
         rotationDecrementInterval = setInterval(() => {
-            if (steeringAngle > 0) {
-                steeringAngle -= steeringRate;
-                if (steeringAngle < 0) {
-                    steeringAngle = 0;
-                    clearInterval(rotationDecrementInterval);
-                    rotationDecrementInterval = null;
-                }
-            } else if (steeringAngle < 0) {
-                steeringAngle += steeringRate;
-                if (steeringAngle > 0) {
-                    steeringAngle = 0;
-                    clearInterval(rotationDecrementInterval);
-                    rotationDecrementInterval = null;
-                }
+          if (steeringAngle > 0) {
+            steeringAngle -= steeringRate;
+            if (steeringAngle < 0) {
+              steeringAngle = 0;
+              clearInterval(rotationDecrementInterval);
+              rotationDecrementInterval = null;
             }
+          } else if (steeringAngle < 0) {
+            steeringAngle += steeringRate;
+            if (steeringAngle > 0) {
+              steeringAngle = 0;
+              clearInterval(rotationDecrementInterval);
+              rotationDecrementInterval = null;
+            }
+          }
         }, 1000); // Reduce the steering angle every second
+      }
     }
-}
-});
+  });
 
-//   if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-//       if (steeringAngle > 0) {
-//           steeringAngle -= steeringRate;
-//           if (steeringAngle < 0) {
-//               steeringAngle = 0;
-//           }
-//       } else if (steeringAngle < 0) {
-//           steeringAngle += steeringRate;
-//           if (steeringAngle > 0) {
-//               steeringAngle = 0;
-//           }
-//       }
-//   }
-// });
+  //   if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+  //       if (steeringAngle > 0) {
+  //           steeringAngle -= steeringRate;
+  //           if (steeringAngle < 0) {
+  //               steeringAngle = 0;
+  //           }
+  //       } else if (steeringAngle < 0) {
+  //           steeringAngle += steeringRate;
+  //           if (steeringAngle > 0) {
+  //               steeringAngle = 0;
+  //           }
+  //       }
+  //   }
+  // });
   physics.update(steeringAngle, throttle);
 
-  
+
 }
 
 function onWindowResize() {
@@ -465,7 +463,7 @@ function onWindowResize() {
 }
 
 function animate() {
-console.log(steeringAngle)
+  console.log(steeringAngle)
 
   render();
   updateCamera();
@@ -474,7 +472,7 @@ console.log(steeringAngle)
   physics.update(steeringAngle, throttle);
 
   if (jet) jet.update();
-  
+
   document.getElementById('acceleration').innerText = `Acceleration: (${physics.acceleration.z.toFixed(2)})`;
   document.getElementById('position').innerText = `Position: (${physics.jetski.position.x.toFixed(2)}, ${physics.jetski.position.y.toFixed(2)}, ${physics.jetski.position.z.toFixed(2)})`;
   document.getElementById('thrust').innerText = `Thrust: ${physics.thrust.powerEngine},${physics.thrust.velocityFan.x}`;

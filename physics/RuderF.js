@@ -4,7 +4,7 @@ export default class Rudder {
   constructor(jetski) {
     this.coefficient = 1.2; // Hydrodynamic coefficient (dimensionless)
     this.area = 0.2; // Steering surface area in m^2
-    this.leverArmLength =jetski.length/3; // Lever arm length in meters
+    this.leverArmLength =2 *jetski.length/3; // Lever arm length in meters
     this.fluidDensity = 1000; // Density of water in kg/m^3
     this.velocity = jetski.velocity; // Velocity of the jet ski in m/s
     this.steeringAngle = 0; // Initial steering angle in radians
