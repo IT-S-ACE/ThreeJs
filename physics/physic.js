@@ -31,6 +31,9 @@ export default class Physic {
    this.maxAngularVelocity = Math.PI/20;
   }
 
+  
+
+
   updateDirection() {
     this.direction.set(0, 0, 1).applyEuler(this.orientation).normalize();
   }

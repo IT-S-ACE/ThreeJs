@@ -524,26 +524,63 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-function animate() {
-  requestAnimationFrame(animate);
 
-  // Update physics and other logic
-  physics.update(steeringAngle, throttle);
-  if (jet) jet.update();
+document.addEventListener("DOMContentLoaded", () => {
+  const accelerationElement = document.getElementById('acceleration');
+  const positionElement = document.getElementById('position');
+  const thrustElement = document.getElementById('thrust');
+  const velocityElement = document.getElementById('velocity');
+  const dragElement = document.getElementById('drag');
+  const deltaTElement = document.getElementById('deltaT');
 
-  // Check for collisions
-  scene.traverse((object) => {
-    if (object.boundingBox && jet.jet) {
-      if (jet.boundingBox.intersectsBox(object.boundingBox)) {
-        handleCollision();  // Function to handle collision
-      }
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Update physics and other logic
+    physics.update(steeringAngle, throttle);
+    if (jet) jet.update();
+
+    if (accelerationElement) {
+      accelerationElement.innerText = `Acceleration: (${physics.acceleration.z.toFixed(2)})`;
     }
-  });
 
-  render();
-  updateCamera();
-  controls.update();
-}
+    if (positionElement) {
+      positionElement.innerText = `Position: (${physics.jetski.position.x.toFixed(2)}, ${physics.jetski.position.y.toFixed(2)}, ${physics.jetski.position.z.toFixed(2)})`;
+    }
+
+    if (thrustElement) {
+      thrustElement.innerText = `Thrust: ${physics.thrust.powerEngine}, ${physics.thrust.velocityFan.x}`;
+    }
+
+    if (velocityElement) {
+      velocityElement.innerText = `Velocity: (${physics.jetski.velocity.x.toFixed(2)}, ${physics.velocity.y.toFixed(2)}, ${physics.jetski.velocity.z.toFixed(2)})`;
+    }
+
+    if (dragElement) {
+      dragElement.innerText = `Drag: (${physics.drag.coefficient}, ${physics.drag.area}, ${physics.drag.fluidDensity}, ${physics.drag.drag_force.z})`;
+    }
+
+    if (deltaTElement) {
+      deltaTElement.innerText = `Delta T: ${physics.deltaT}`;
+    }
+
+    // Check for collisions
+    scene.traverse((object) => {
+      if (object.boundingBox && jet.jet) {
+        if (jet.boundingBox.intersectsBox(object.boundingBox)) {
+          handleCollision();  // Function to handle collision
+        }
+      }
+    });
+
+    render();
+    updateCamera();
+    controls.update();
+  }
+
+  animate();
+});
+
 
 function handleCollision() {
   // Logic to stop the jet ski when a collision is detected
